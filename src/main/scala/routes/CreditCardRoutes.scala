@@ -1,9 +1,9 @@
-package creditcardservice.routes
+package creditcardaggregator.routes
 
 import cats.*
 import cats.effect.*
 
-import creditcardservice.endpoints.CreditCardEndpoints
+import creditcardaggregator.endpoints.CreditCardEndpoints
 import org.http4s.HttpRoutes
 import sttp.tapir.server.http4s.*
 import sttp.tapir.server.http4s.Http4sServerInterpreter

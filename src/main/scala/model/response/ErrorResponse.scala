@@ -1,4 +1,4 @@
-package creditcardservice.model.response
+package creditcardaggregator.model.response
 
 sealed trait ErrorResponse:
   def message: String

@@ -1,4 +1,4 @@
-package creditcardservice.model
+package creditcardaggregator.model
 
 case class User(
   name: String,

@@ -1,4 +1,4 @@
-package creditcardservice.model.response
+package creditcardaggregator.model.response
 
 import io.circe.Codec
 import io.circe.generic.semiauto.*

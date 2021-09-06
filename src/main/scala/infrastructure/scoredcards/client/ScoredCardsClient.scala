@@ -1,4 +1,4 @@
-package creditcardaggregator.infrastructure.cscards.client
+package creditcardaggregator.infrastructure.scoredcards.client
 
 import cats.*
 import cats.implicits.*
@@ -16,30 +16,30 @@ import creditcardaggregator.model.{CreditCard, User}
 import creditcardaggregator.service.CreditCardPartnerApi
 import creditcardaggregator.infrastructure.config.CardProviderConfig
 
-object CsCardsClient {
-  def apply[F[_]: Async](baseUrl: String, providerConfig: CardProviderConfig): Resource[F, CsCardsClient[F]] = {
+object ScoredCardsClient {
+  def apply[F[_]: Async](baseUrl: String, providerConfig: CardProviderConfig): Resource[F, ScoredCardsClient[F]] = {
     val conf: AsyncHttpClientConfig = new DefaultAsyncHttpClientConfig.Builder()
       .build()
 
     AsyncHttpClientCatsBackend
       .resourceUsingConfig(conf)
-      .map(backend => new CsCardsClient(baseUrl, providerConfig, backend))
+      .map(backend => new ScoredCardsClient(baseUrl, providerConfig, backend))
   }
 }
 
-class CsCardsClient[F[_]](
+class ScoredCardsClient[F[_]](
   baseUrl: String,
   config: CardProviderConfig,
   backend: SttpBackend[F, Any]
 )(using F: MonadError[F, Throwable])
     extends CreditCardPartnerApi[F] {
   override def listCreditCards(user: User): F[List[CreditCard]] = {
-    val uri = uri"$baseUrl/v1/cards"
+    val uri = uri"$baseUrl/v2/creditcards"
     for {
       response <- basicRequest
-                    .body(CsCardRequest(user))
+                    .body(ScoredCardsRequest(user))
                     .post(uri)
-                    .response(asJson[List[CsCardResponse]])
+                    .response(asJson[List[ScoredCardsResponse]])
                     .send(backend)
       body <- F.fromEither(response.body)
     } yield body.map(_.toCreditCard(config))

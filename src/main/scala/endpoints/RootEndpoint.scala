@@ -1,4 +1,4 @@
-package creditcardservice.endpoints
+package creditcardaggregator.endpoints
 
 import sttp.tapir.*
 import sttp.tapir.json.circe.*
@@ -7,7 +7,7 @@ import sttp.model.StatusCode
 import io.circe.generic.auto.*
 import sttp.tapir.generic.auto.*
 
-import creditcardservice.model.response.ErrorResponse
+import creditcardaggregator.model.response.ErrorResponse
 
 object RootEndpoint {
   val root: Endpoint[Unit, ErrorResponse, Unit, Any] =

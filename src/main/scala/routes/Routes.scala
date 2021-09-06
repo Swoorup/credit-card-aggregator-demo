@@ -1,4 +1,4 @@
-package creditcardservice.routes
+package creditcardaggregator.routes
 
 import org.http4s.HttpRoutes
 

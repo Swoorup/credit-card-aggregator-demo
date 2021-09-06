@@ -1,4 +1,4 @@
-package creditcardservice.model
+package creditcardaggregator.model
 
 import scala.math.*
 
@@ -10,10 +10,10 @@ case class CreditCard(
 )
 
 object CreditCard {
-  def calculateSortingScore(eligibility: Double, apr: Double): Double = 
-    eligibility * pow(1/apr, 2)
+  def calculateSortingScore(eligibility: Double, apr: Double): Double =
+    eligibility * pow(1 / apr, 2)
 
-  def apply(provider: String, name: String, apr: BigDecimal, eligibility: BigDecimal): CreditCard = 
+  def apply(provider: String, name: String, apr: BigDecimal, eligibility: BigDecimal): CreditCard =
     val sortScore = calculateSortingScore(eligibility.toDouble, apr.toDouble)
     CreditCard(provider, name, apr, sortScore)
 }

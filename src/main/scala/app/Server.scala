@@ -1,8 +1,8 @@
-package creditcardservice
+package creditcardaggregator.app
 
 import cats.effect.Async
 import org.http4s.HttpApp
-import creditcardservice.routes.Routes
+import creditcardaggregator.routes.Routes
 
 object Server {
   import cats.syntax.semigroupk._

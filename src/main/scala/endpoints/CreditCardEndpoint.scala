@@ -1,4 +1,4 @@
-package creditcardservice.endpoints
+package creditcardaggregator.endpoints
 
 import cats.effect.Async
 import cats.implicits.*
@@ -8,10 +8,10 @@ import sttp.tapir.server.ServerEndpoint
 import sttp.model.StatusCode
 import io.circe.generic.auto.*
 
-import creditcardservice.service.CreditCardAggregatorService
-import creditcardservice.model.request.CreditCardRequest
-import creditcardservice.model.response.{CreditCard, CreditCardResponse, ErrorResponse}
-import creditcardservice.model.{CreditCard as CreditCardDomain, User}
+import creditcardaggregator.service.CreditCardAggregatorService
+import creditcardaggregator.model.request.CreditCardRequest
+import creditcardaggregator.model.response.{CreditCard, CreditCardResponse, ErrorResponse}
+import creditcardaggregator.model.{CreditCard as CreditCardDomain, User}
 
 extension (req: CreditCardRequest)
   private def toUser: User = User(
@@ -20,14 +20,14 @@ extension (req: CreditCardRequest)
     salary = req.salary
   )
 
-class CreditCardEndpoints[F[_]: Async](creditCardService: CreditCardAggregatorService[F]) {
+class CreditCardEndpoints[F[_]: Async](ccAggregator: CreditCardAggregatorService[F]) {
   val findCreditCards: ServerEndpoint[CreditCardRequest, ErrorResponse, CreditCardResponse, Any, F] =
     RootEndpoint.root.post
       .description("Find credit cards for a given user")
       .in("creditcards")
       .in(jsonBody[CreditCardRequest])
       .out(jsonBody[CreditCardResponse])
-      .serverLogic(request => creditCardService.recommend(request.toUser).map(toCreditCardResponse))
+      .serverLogic(request => ccAggregator.aggregateCreditCards(request.toUser).map(toCreditCardResponse))
 
   private def toResponse[I, R](input: Option[I], f: I => R, error: ErrorResponse): Either[ErrorResponse, R] =
     input.fold[Either[ErrorResponse, R]](Left(error))(input => Right(f(input)))
