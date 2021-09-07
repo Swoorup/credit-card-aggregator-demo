@@ -1,20 +1,18 @@
 package creditcardaggregator.infrastructure.scoredcards.client
 
-import io.circe.Codec
+import io.circe.Decoder
 import io.circe.generic.semiauto.*
 import creditcardaggregator.model.CreditCard
 import creditcardaggregator.infrastructure.config.CardProviderConfig
+import creditcardaggregator.service.CreditCardPartnerApiCard
 
 case class ScoredCardsResponse(
   card: String,
   apr: Double,
   approvalRating: Double
-) derives Codec.AsObject {
-  def toCreditCard(config: CardProviderConfig): CreditCard =
-    CreditCard(
-      provider = config.providerName,
-      name = card,
-      apr = apr,
-      eligibility = config.eligibilityScale.normalize(approvalRating)
-    )
+) extends CreditCardPartnerApiCard {
+  override def name        = card
+  override def eligibility = approvalRating
 }
+
+given Decoder[ScoredCardsResponse] = deriveDecoder[ScoredCardsResponse]

@@ -8,7 +8,7 @@ import sttp.tapir.server.ServerEndpoint
 import sttp.model.StatusCode
 import io.circe.generic.auto.*
 
-import creditcardaggregator.service.CreditCardAggregatorService
+import creditcardaggregator.service.*
 import creditcardaggregator.model.request.CreditCardRequest
 import creditcardaggregator.model.response.{CreditCard, CreditCardResponse, ErrorResponse}
 import creditcardaggregator.model.{CreditCard as CreditCardDomain, User}
@@ -29,9 +29,20 @@ class CreditCardEndpoints[F[_]: Async](ccAggregator: CreditCardAggregatorService
       .out(jsonBody[CreditCardResponse])
       .serverLogic(request => ccAggregator.aggregateCreditCards(request.toUser).map(toCreditCardResponse))
 
-  private def toResponse[I, R](input: Option[I], f: I => R, error: ErrorResponse): Either[ErrorResponse, R] =
-    input.fold[Either[ErrorResponse, R]](Left(error))(input => Right(f(input)))
-
-  private def toCreditCardResponse(cards: List[CreditCardDomain]): Either[ErrorResponse, CreditCardResponse] =
-    cards.map(card => CreditCard(card.provider, card.name, card.apr, card.cardScore)).asRight
+  private def toCreditCardResponse(
+    result: Either[CreditCardAggregatorError, List[CreditCardDomain]]
+  ): Either[ErrorResponse, CreditCardResponse] =
+    result.fold(
+      { case CreditCardAggregatorError.ProviderError(provider) =>
+        ErrorResponse.CreditCardProviderErrorResponse(s"Unable to query card partner: $provider").asLeft
+      },
+      _.map(card =>
+        CreditCard(
+          card.provider,
+          card.name,
+          card.apr,
+          card.cardScore.setScale(3, BigDecimal.RoundingMode.DOWN)
+        )
+      ).asRight
+    )
 }

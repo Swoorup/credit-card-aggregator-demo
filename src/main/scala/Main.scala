@@ -9,6 +9,8 @@ import org.http4s.blaze.server.BlazeServerBuilder
 import scala.concurrent.ExecutionContext.global
 
 import creditcardaggregator.app.*
+import creditcardaggregator.infrastructure.cscards.DefaultCsCardProviderConfig
+import creditcardaggregator.infrastructure.scoredcards.DefaultScoredCardProviderConfig
 
 object CreditAggregatorApi
     extends CommandIOApp(
@@ -20,7 +22,15 @@ object CreditAggregatorApi
     val port                = Opts.option[Int]("port", "The port to expose service on.", short = "p")
     val cscardsEndpoint     = Opts.option[String]("cs-cards-api", "The base url for CSCards.", short = "c")
     val scoredCardsEndpoint = Opts.option[String]("scored-cards-api", "The base url for ScoredCards.", short = "s")
-    (port, cscardsEndpoint, scoredCardsEndpoint).mapN(AppConfig.apply)
+    (port, cscardsEndpoint, scoredCardsEndpoint).mapN { case (port, cscardsEndpoint, scoredCardsEndpoint) =>
+      AppConfig(
+        port = port,
+        csCardsBaseUrl = cscardsEndpoint,
+        csCardsProviderConfig = DefaultCsCardProviderConfig,
+        scoredCardsBaseUrl = scoredCardsEndpoint,
+        scoredCardsProviderConfig = DefaultScoredCardProviderConfig
+      )
+    }
   }
 
   def run(config: AppConfig): IO[ExitCode] =

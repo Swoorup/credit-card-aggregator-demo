@@ -1,7 +1,7 @@
 
-# In-Memory Document Database Demo
+# Credit Card aggregator service
 
-A demonstration of in-memory document database, powered by [cats-effect](https://typelevel.org/cats-effect/) and [scala 3](https://docs.scala-lang.org/scala3/).
+An aggregator of multiple credit card provider service, powered by [scala 3](https://docs.scala-lang.org/scala3/).
 
 ## Build Requirements.
 
@@ -12,108 +12,47 @@ A demonstration of in-memory document database, powered by [cats-effect](https:/
   * [VSCode with Metals plugin](https://scalameta.org/metals/docs/editors/vscode/)
   * [IntelliJ with Scala plugin](https://www.jetbrains.com/help/idea/discover-intellij-idea-for-scala.html)
 
+## Building
+
+This project uses [Sbt-native-packager](https://github.com/sbt/sbt-native-packager). 
+To build native binary run the following sbt command:
+
+```shell
+sbt stage
+```
+
+This will generate a local executable binary in `./target/universal/stage/bin/credit-card-aggregator`. 
+For other platforms and different formats, see also [Creating package](https://www.scala-sbt.org/sbt-native-packager/gettingstarted.html#create-a-package)
+
 ## Running
 
-The repository provides sample json files for the type `User` and `Ticket` in the directory `./sample-data/`. 
+Once you have built the binaries locally, You can launch the app using the following command.
 
-To view supported command line options, you can run:
+For help:
 ```shell
-sbt "run --help"
+./target/universal/stage/bin/credit-card-aggregator --help
 ```
 
-You can launch the demo app using the following sbt command.
+To run the aggregator service, run the following command:
 
 ```shell
-sbt "run --users sample-data/users.json --tickets sample-data/tickets.json"
+./target/universal/stage/bin/credit-card-aggregator \
+  -p 9090 \
+  -c "https://app.clearscore.com/api/global/backend-tech-test/" \
+  -s "https://app.clearscore.com/api/global/backend-tech-test/"
 ```
 
-As outlined in the specs, once run you are presented with a `Console` which allows you to search tickets or users.
+Or via `start.sh`. For example:
+
+```shell
+export HTTP_PORT=9090
+export CSCARDS_ENDPOINT="https://app.clearscore.com/api/global/backend-tech-test/" 
+export SCOREDCARDS_ENDPOINT="https://app.clearscore.com/api/global/backend-tech-test/"
+./start.sh
+```
+
+Note: To shutdown, either press enter or `Ctrl-C` to halt.
 
 ## Test
 
 Test can be run with the command: `sbt test`
-
-## Adding new schema for type for indexing.
-
-To add in-memory supported for any type you would need to provide `DocumentSchema[T, K]` where `T` is the type of the object being stored and `K` refers to its primary key. For the ticket example, the schema is declared as the following:
-
-```scala
-  given DocumentSchema[Ticket, TicketId] with
-    def name    = "Ticket"
-    def primary = IndexField("_id", _.id)
-    def nonPrimary = List(
-      IndexField("created_at", _.createdAt),
-      IndexField("type", _.ticketType),
-      IndexField("subject", _.subject),
-      IndexField("assignee_id", _.assigneeId),
-      IndexField("tags", _.tags)
-    )
-```
-
-To query a field. You will have to implicitly pass the `DocumentSchema` along with specifying the type parameters when querying with the `Database` trait, so it is able to match the correct documents. Not doing so will result in compiler error.
-
-## Workflow
-
-### Insertion
-
-              ┌───────────────────────────────────────┐
-              │                                       │
-              │               Insertion               │
-              │                                       │
-              │ ┌───────────────────────────────────┐ │
-              │ │ Encode fields to Index Primitives │ │
-              │ └─────────────────┬─────────────────┘ │
-              │                   │                   │
-              │                   │                   │
-              │ ┌─────────────────▼─────────────────┐ │
-              │ │   Create IndexData and Document   │ │
-              │ └─────────────────┬─────────────────┘ │
-              │                   │                   │
-              │                   │                   │
-              │ ┌─────────────────▼─────────────────┐ │
-              │ │   Merge Documents in the database │ │
-              │ └───────────────────────────────────┘ │
-              │                                       │
-              └───────────────────────────────────────┘
-
-### Searching
-
-
-               ┌────────────────────────────────────┐
-               │                                    │
-               │              Search                │
-               │                                    │
-               │ ┌────────────────────────────────┐ │
-               │ │Decode input to Index Primitive │ │
-               │ └───────────────┬────────────────┘ │
-               │                 │                  │
-               │                 │                  │
-               │ ┌───────────────▼────────────────┐ │
-               │ │ Retrieve Documents for schema  │ │
-               │ └───────────────┬────────────────┘ │
-               │                 │                  │
-               │                 │                  │
-               │ ┌───────────────▼────────────────┐ │
-               │ │  Full match with Index Data    │ │
-               │ └────────────────────────────────┘ │
-               │                                    │
-               └────────────────────────────────────┘
- 
-
-
-## Notes/Assumptions
-
-* Only full value matching is supported when searching via fields. However, for arrays it supports matching any of the array elements.
-* There is currently no way to query optional fields whose values are not present.
-* Only immutable constructs i.e `case classes` must be used for runtime safety.
-* Currently updating the same document already present in the database (identified by `_id`) is unsupported due to stale indexes not being deleted. This makes it best suited for append-only data. 
-
-## Future improvements
-
-* Type-specific indexers. All indexes fields must be converted to internal database representation `IndexValue`. But this is currently under utilized and only supports full value matches. 
-For example, it should be possible to add Geospatial indexing, Trie-based indexing etc.
-* Macro to derive the schema automatically from case classes.
-
-## Demo 
-
-[![asciicast](https://asciinema.org/a/m27QSxw5GC1EYCRep4c59Fn56.svg)](https://asciinema.org/a/m27QSxw5GC1EYCRep4c59Fn56)

@@ -16,12 +16,8 @@ object RootEndpoint {
   private lazy val errorResponseMapping: EndpointOutput.Single[ErrorResponse] =
     oneOf[ErrorResponse](
       statusMapping(
-        StatusCode.NotFound,
-        jsonBody[ErrorResponse.NotFoundResponse].description("Not found")
-      ),
-      statusMapping(
-        StatusCode.BadRequest,
-        jsonBody[ErrorResponse.BadRequestResponse].description("Bad request")
+        StatusCode.BadGateway,
+        jsonBody[ErrorResponse.CreditCardProviderErrorResponse].description("Bad gateway")
       ),
       statusMapping(
         StatusCode.InternalServerError,
