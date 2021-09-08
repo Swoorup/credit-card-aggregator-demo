@@ -46,7 +46,19 @@ class CreditCardEndpointsSuite extends CatsEffectSuite:
     )
   }
 
-  test("Returns error response if provider has error") {
+  test("Returns bad request if validation on user request failed") {
+    val request = Request[IO](Method.POST, uri"creditcards")
+      .withEntity("""{
+        "name": "John Smith",
+        "creditScore": 999,
+        "salary": 28000
+        }""")
+
+    val response = createService(true, request).unsafeRunSync()
+    assertEquals(response.status, Status.BadRequest)
+  }
+
+  test("Returns bad gateway error response if provider has error") {
     val request = Request[IO](Method.POST, uri"creditcards")
       .withEntity("""{
         "name": "John Smith",

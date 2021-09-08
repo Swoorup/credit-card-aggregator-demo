@@ -1,6 +1,6 @@
 package creditcardaggregator.model.response
 
-import io.circe.Encoder
+import io.circe.Codec
 import io.circe.generic.semiauto.*
 import sttp.tapir.*
 
@@ -14,11 +14,11 @@ case class CreditCard(
 type CreditCardResponse = List[CreditCard]
 
 object CreditCard {
-  given Encoder[CreditCard] = deriveEncoder[CreditCard]
-  given Schema[CreditCard]  = Schema.derived
+  given Codec[CreditCard]  = deriveCodec[CreditCard]
+  given Schema[CreditCard] = Schema.derived
 }
 
 object CreditCardResponse {
-  given Encoder[CreditCardResponse] = deriveEncoder[CreditCardResponse]
-  given Schema[CreditCardResponse]  = Schema.derived
+  given Codec[CreditCardResponse]  = deriveCodec[CreditCardResponse]
+  given Schema[CreditCardResponse] = Schema.derived
 }

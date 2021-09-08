@@ -6,7 +6,6 @@ import sttp.tapir.*
 import sttp.tapir.json.circe.*
 import sttp.tapir.server.ServerEndpoint
 import sttp.model.StatusCode
-import io.circe.generic.auto.*
 
 import creditcardaggregator.service.*
 import creditcardaggregator.model.request.CreditCardRequest

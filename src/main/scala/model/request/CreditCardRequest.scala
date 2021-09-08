@@ -13,11 +13,11 @@ case class CreditCardRequest(
 object CreditCardRequest {
   given Codec[CreditCardRequest] = deriveCodec[CreditCardRequest]
 
-  given Validator[CreditCardRequest] = Validator.all(
+  given validator: Validator[CreditCardRequest] = Validator.all(
     Validator.min(0).contramap(_.salary),
     Validator.min(0).contramap(_.creditScore),
     Validator.max(700).contramap(_.creditScore)
   )
 
-  given Schema[CreditCardRequest] = Schema.derived
+  given Schema[CreditCardRequest] = Schema.derived[CreditCardRequest].validate(validator)
 }
